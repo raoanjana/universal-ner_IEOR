@@ -48,8 +48,6 @@ def ask_openai_allEntities(text):
             stop=None
         )
         json_response = response.choices[0].text.strip()
-        print(response)
-        print(json_response)
         index_of_start = json_response.find("[")
         json_response.replace('""""', '"')
         if '"entity":' in  json_response[0:len('"entity":')]:
@@ -79,7 +77,6 @@ def get_GPTInstruction(text, instruction_list):
 
     #get_GPTInstruction(text, output_file_path)
     entity_categories = ["organization", "person", "product", "location", "event", "currency", "rate", "date", "law", "stock ticker", "indicator", "quantity", "commodity", "monetary value", "metric"]
-    print(text)
     answer = ask_openai_allEntities(text)
     # Ensure GPT's answer is formatted correctly as a JSON array
     try:
@@ -88,30 +85,33 @@ def get_GPTInstruction(text, instruction_list):
         answer_data = json.loads(answer)
     except ValueError as e:
         # If parsing fails, set answer to an empty array
-        answer_data = "[]"
+        answer_data = []
     answer_dict = {}
     print(answer_data)
-    if answer_data != "[]":
-        for item in answer_data:
-            if 'entity' in item.keys() and 'value' in item.keys():
-                key = item['entity']
-                #check if entity is in answer_dict
-                if key in answer_dict.keys():
-                    #get the entity name for item
-                    #append the value list to the entity in the answer dictionary 
-                    value = item['value']
-                    list_set = set(value)
-                    # convert the set to the list
-                    unique_value = (list(list_set))
-                    for val in unique_value:
-                        if val not in answer_dict[key]:
-                            answer_dict[key].append(val)
-                else:
-                    value = item['value']
-                    list_set = set(value)
-                    # convert the set to the list
-                    unique_value = (list(list_set))
-                    answer_dict[key] = unique_value
+    try:
+        if answer_data != "[]":
+            for item in answer_data:
+                if 'entity' in item.keys() and 'value' in item.keys():
+                    key = item['entity']
+                    #check if entity is in answer_dict
+                    if key in answer_dict.keys():
+                        #get the entity name for item
+                        #append the value list to the entity in the answer dictionary 
+                        value = item['value']
+                        list_set = set(value)
+                        # convert the set to the list
+                        unique_value = (list(list_set))
+                        for val in unique_value:
+                            if val not in answer_dict[key]:
+                                answer_dict[key].append(val)
+                    else:
+                        value = item['value']
+                        list_set = set(value)
+                        # convert the set to the list
+                        unique_value = (list(list_set))
+                        answer_dict[key] = unique_value
+    except Exception as e:
+        print("found error skipping")
     conversation_flow = create_convo_flow(entity_categories, answer_dict, text, instruction_list) 
     return conversation_flow
 
@@ -123,7 +123,6 @@ def create_convo_flow(entity_categories, answer_dict, text, instruction_list):
         conversation_flow.append({"from": "gpt", "value": value})
         id = "NER_" + str(len(instruction_list))
         instruction_list.append({"id": id, "conversations": conversation_flow})
-        #print(conversation_flow)
         if key in entity_categories: 
             entity_categories.remove(key)
 
@@ -131,10 +130,9 @@ def create_convo_flow(entity_categories, answer_dict, text, instruction_list):
     for category in entity_categories:
         conversation_flow = [{"from": "human", "value": text}, {"from": "gpt", "value": "I've read this text."}]
         conversation_flow.append({"from": "human", "value": f"What describes {category} in the text?"})
-        conversation_flow.append({"from": "gpt", "value": '[]'})
+        conversation_flow.append({"from": "gpt", "value": []})
         id = "NER_" + str(len(instruction_list))
         instruction_list.append({"id": id, "conversations": conversation_flow})
-        #print(conversation_flow)
     return instruction_list
 
 
@@ -149,18 +147,5 @@ if __name__ == "__main__":
 
     entity_categories = ["law", "organization", "person", "object", "function", "compound", "location", "chemical", "profession"]
 
-    # for category in entity_categories:
-    #     answer = ask_openai(text, category)
-
-    #     # Ensure GPT's answer is formatted correctly as a JSON array
-    #     try:
-    #         # Attempt to parse the answer to validate it's a proper JSON format
-    #         json.loads(answer)
-    #     except json.JSONDecodeError:
-    #         # If parsing fails, set answer to an empty array
-    #         answer = "[]"
-
-    #     conversation_flow.append({"from": "human", "value": f"What describes {category} in the text?"})
-    #     conversation_flow.append({"from": "gpt", "value": answer})
-
+ 
     write_results_to_file(conversation_flow, output_file_path)
