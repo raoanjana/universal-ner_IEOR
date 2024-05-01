@@ -1,4 +1,4 @@
-## UniversalNER 🚀
+## UniversalNER Adopted for Financial Data 🚀
 
 *UniversalNER: Targeted Distillation from Large Language Models for Open Named Entity Recognition*<br/>
 [Wenxuan Zhou*](https://wzhouad.github.io/), [Sheng Zhang*](https://sheng-z.github.io/), [Yu Gu](https://www.linkedin.com/in/aidengu/), [Muhao Chen](https://muhaochen.github.io/), [Hoifung Poon](https://www.microsoft.com/en-us/research/people/hoifung/) (*Equal Contribution)
