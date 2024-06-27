@@ -59,10 +59,10 @@ if __name__ == "__main__":
     count = 1
     file_names.sort(key=lambda x: int(''.join(filter(str.isdigit, x))))
     for file_path in file_names:
-        if count >=108 and count <= 150:
-            print(count)
-            print(file_path)
-            generate_instructions(file_path, "sec_" + str(count), "training_1")
-        if count > 150:
+        # if count >=108 and count <= 150:
+        #     print(count)
+        #     print(file_path)
+        #     generate_instructions(file_path, "sec_" + str(count), "training_1")
+        if count >= 183:
             generate_instructions(file_path, "sec_" + str(count), "testing_1")
         count+=1
